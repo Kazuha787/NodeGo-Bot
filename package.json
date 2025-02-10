@@ -1,0 +1,39 @@
+{
+    "name": "nodego-auto-bot",
+    "version": "1.0.0",
+    "description": "Automated bot for NodeGo platform with multi-account and proxy support",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+      "start": "node index.js",
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/airdropinsiders/NodeGo-Auto-Bot.git"
+    },
+    "keywords": [
+      "nodego",
+      "bot",
+      "automation",
+      "proxy",
+      "socks",
+      "http-proxy"
+    ],
+    "author": "airdropinsiders",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/airdropinsiders/NodeGo-Auto-Bot/issues"
+    },
+    "homepage": "https://github.com/airdropinsiders/NodeGo-Auto-Bot#readme",
+    "dependencies": {
+      "axios": "^1.6.7",
+      "chalk": "^5.3.0",
+      "socks-proxy-agent": "^8.0.2",
+      "http-proxy-agent": "^7.0.0",
+      "https-proxy-agent": "^7.0.2"
+    },
+    "engines": {
+      "node": ">=16.0.0"
+    }
+  }
