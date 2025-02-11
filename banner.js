@@ -1,10 +1,30 @@
-import chalk from 'chalk';
-export const banner = `
-██╗  ██╗ █████╗ ███████╗██╗   ██╗██╗  ██╗ █████╗ 
-██║ ██╔╝██╔══██╗╚══███╔╝██║   ██║██║  ██║██╔══██╗
-█████╔╝ ███████║  ███╔╝ ██║   ██║███████║███████║
-██╔═██╗ ██╔══██║ ███╔╝  ██║   ██║██╔══██║██╔══██║
-██║  ██╗██║  ██║███████╗╚██████╔╝██║  ██║██║  ██║
-╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝                                                
-            ${chalk.blue('NODE-GO DEPIN')}                
-📢  ${chalk.blue('Telegram Channel: https://t.me/Kazuha787_Im_Offical')}`;
+import chalk from 'chalk';
+
+
+
+export default function displayBanner() {
+
+    console.log(chalk.cyan(`
+
+ 
+██╗  ██╗ █████╗ ███████╗██╗   ██╗██╗  ██╗ █████╗ 
+██║ ██╔╝██╔══██╗╚══███╔╝██║   ██║██║  ██║██╔══██╗
+█████╔╝ ███████║  ███╔╝ ██║   ██║███████║███████║
+██╔═██╗ ██╔══██║ ███╔╝  ██║   ██║██╔══██║██╔══██║
+██║  ██╗██║  ██║███████╗╚██████╔╝██║  ██║██║  ██║
+╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+                                                 
+
+                ${chalk.yellow('NODEGO AUTO - BOT')}                
+
+    📢  ${chalk.yellow('Telegram Channel: https://t.me/AirdropInsiderID')}`));
+
+
+
+    console.log(chalk.yellow('\n════════════════════════════════════════════════════════'));
+
+    console.log(chalk.white(`Started at: ${new Date().toLocaleString()}`));
+
+    console.log(chalk.yellow('════════════════════════════════════════════════════════\n'));
+
+}
