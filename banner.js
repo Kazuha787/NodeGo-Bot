@@ -15,9 +15,9 @@ export default function displayBanner() {
 ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
                                                  
 
-                ${chalk.yellow('NODEGO AUTO - BOT')}                
+                ${chalk.yellow('NODEGO AUTO - BOT BY KAZUHA ')}                
 
-    📢  ${chalk.yellow('Telegram Channel: https://t.me/AirdropInsiderID')}`));
+    📢  ${chalk.yellow('Telegram Channel: https://t.me/Im_Offical_Kazuha')}`));
 
 
 
