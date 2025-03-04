@@ -1,6 +1,9 @@
 # NodeGo Auto Bot
 
-# JOIN MY CHANNEL [(https://t.me/Offical_Im_kazuha)]
+## 📢 Join Our Community
+
+# Telegram Channel: .[Channel](https://t.me/Offical_Im_kazuha)
+# GitHub Repository: [NODEGO](https://github.com/Kazuha787/NodeGo-Bot.git)
 
 Automated bot for NodeGo platform with support for multiple accounts and proxy configurations (HTTP/SOCKS).
 
