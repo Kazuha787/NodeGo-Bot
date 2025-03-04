@@ -1,214 +1,351 @@
 import fs from 'fs';
+
 import axios from 'axios';
+
 import { URL } from 'url';
+
 import { SocksProxyAgent } from 'socks-proxy-agent';
+
 import { HttpsProxyAgent } from 'https-proxy-agent';
+
 import { HttpProxyAgent } from 'http-proxy-agent';
+
 import chalk from 'chalk';
-import displayBanner from './banner.js';
+
+import displayBanner from './banner.js'; 
+
+
+
+const userAgents = [
+
+  'Chrome-Win10', 'Chrome-Mac', 'Firefox-Win',
+
+  'Firefox-Mac', 'Chrome-Linux', 'Safari-iPhone', 'Edge-Win'
+
+];
+
+
+
+const getRandomUA = () => userAgents[Math.floor(Math.random() * userAgents.length)];
+
+
 
 class NodeGoPinger {
-    constructor(token, proxyUrl = null) {
-        this.apiBaseUrl = 'https://nodego.ai/api';
-        this.bearerToken = token;
-        this.agent = proxyUrl ? this.createProxyAgent(proxyUrl) : null;
-        this.lastPingTimestamp = 0;
-    }
 
-    createProxyAgent(proxyUrl) {
-        try {
-            const parsedUrl = new URL(proxyUrl);
-            
-            // Handle different proxy protocols
-            if (proxyUrl.startsWith('socks')) {
-                return new SocksProxyAgent(parsedUrl);
-            } else if (proxyUrl.startsWith('http')) {
-                // Use appropriate agent for HTTP/HTTPS
-                return {
-                    httpAgent: new HttpProxyAgent(parsedUrl),
-                    httpsAgent: new HttpsProxyAgent(parsedUrl)
-                };
-            } else {
-                // Default to HTTP if no protocol specified
-                const httpUrl = `http://${proxyUrl}`;
-                const httpParsedUrl = new URL(httpUrl);
-                return {
-                    httpAgent: new HttpProxyAgent(httpParsedUrl),
-                    httpsAgent: new HttpsProxyAgent(httpParsedUrl)
-                };
-            }
-        } catch (error) {
-            console.error(chalk.red('Invalid proxy URL:'), error.message);
-            return null;
-        }
-    }
+  constructor(token, proxyUrl = null) {
 
-    async getUserInfo() {
-        try {
-            const response = await this.makeRequest('GET', '/user/me');
-            const metadata = response.data.metadata;
-            return {
-                username: metadata.username,
-                email: metadata.email,
-                totalPoint: metadata.rewardPoint,
-                nodes: metadata.nodes.map(node => ({
-                    id: node.id,
-                    totalPoint: node.totalPoint,
-                    todayPoint: node.todayPoint,
-                    isActive: node.isActive
-                }))
-            };
-        } catch (error) {
-            console.error(chalk.red('Failed to fetch user info:'), error.message);
-            throw error; // Propagate error for better handling
-        }
-    }
+    this.apiBaseUrl = 'https://nodego.ai/api';
 
-    async makeRequest(method, endpoint, data = null) {
-        const config = {
-            method,
-            url: `${this.apiBaseUrl}${endpoint}`,
-            headers: {
-                'Authorization': `Bearer ${this.bearerToken}`,
-                'Content-Type': 'application/json',
-                'Accept': '*/*'
-            },
-            ...(data && { data }),
-            timeout: 30000 // 30 second timeout
+    this.bearerToken = token;
+
+    this.agent = proxyUrl ? this.createProxyAgent(proxyUrl) : null;
+
+    this.lastPingTimestamp = 0;
+
+  }
+
+
+
+  createProxyAgent(proxyUrl) {
+
+    try {
+
+      const parsedUrl = new URL(proxyUrl);
+
+
+
+      if (proxyUrl.startsWith('socks4') || proxyUrl.startsWith('socks5')) {
+
+        return new SocksProxyAgent(parsedUrl);
+
+      } else if (proxyUrl.startsWith('http')) {
+
+        return {
+
+          httpAgent: new HttpProxyAgent(parsedUrl),
+
+          httpsAgent: new HttpsProxyAgent(parsedUrl)
+
         };
 
-        // Apply proxy agents if configured
-        if (this.agent) {
-            if (this.agent.httpAgent) {
-                // For HTTP/HTTPS proxies
-                config.httpAgent = this.agent.httpAgent;
-                config.httpsAgent = this.agent.httpsAgent;
-            } else {
-                // For SOCKS proxies
-                config.httpAgent = this.agent;
-                config.httpsAgent = this.agent;
-            }
-        }
+      } else {
 
-        try {
-            return await axios(config);
-        } catch (error) {
-            if (error.code === 'ECONNREFUSED' || error.code === 'ETIMEDOUT') {
-                throw new Error(`Proxy connection failed: ${error.message}`);
-            }
-            throw error;
-        }
+        const httpUrl = `http://${proxyUrl}`;
+
+        const httpParsedUrl = new URL(httpUrl);
+
+        return {
+
+          httpAgent: new HttpProxyAgent(httpParsedUrl),
+
+          httpsAgent: new HttpsProxyAgent(httpParsedUrl)
+
+        };
+
+      }
+
+    } catch (error) {
+
+      console.error(chalk.red('Invalid proxy URL:'), error.message);
+
+      return null;
+
     }
 
-    async ping() {
-        try {
-            const currentTime = Date.now();
-            
-            // Ensure at least a 3-second gap between pings
-            if (currentTime - this.lastPingTimestamp < 3000) {
-                await new Promise(resolve => setTimeout(resolve, 3000 - (currentTime - this.lastPingTimestamp)));
-            }
+  }
 
-            const response = await this.makeRequest('POST', '/user/nodes/ping', { type: 'extension' });
-            
-            this.lastPingTimestamp = Date.now();
-            
-            return {
-                statusCode: response.data.statusCode,
-                message: response.data.message,
-                metadataId: response.data.metadata.id
-            };
-        } catch (error) {
-            console.error(chalk.red(`Ping failed: ${error.message}`));
-            throw error;
-        }
+
+
+  async makeRequest(method, endpoint, data = null) {
+
+    const config = {
+
+      method,
+
+      url: `${this.apiBaseUrl}${endpoint}`,
+
+      headers: {
+
+        'Authorization': `Bearer ${this.bearerToken}`,
+
+        'Content-Type': 'application/json',
+
+        'Accept': '*/*',
+
+        'User-Agent': getRandomUA()
+
+      },
+
+      ...(data && { data }),
+
+      timeout: 30000
+
+    };
+
+
+
+    if (this.agent) {
+
+      if (this.agent.httpAgent) {
+
+        config.httpAgent = this.agent.httpAgent;
+
+        config.httpsAgent = this.agent.httpsAgent;
+
+      } else {
+
+        config.httpAgent = this.agent;
+
+        config.httpsAgent = this.agent;
+
+      }
+
     }
+
+
+
+    try {
+
+      return await axios(config);
+
+    } catch (error) {
+
+      throw error;
+
+    }
+
+  }
+
+
+
+  async ping() {
+
+    try {
+
+      const currentTime = Date.now();
+
+
+
+      if (currentTime - this.lastPingTimestamp < 3000) {
+
+        await new Promise(resolve => setTimeout(resolve, 3000 - (currentTime - this.lastPingTimestamp)));
+
+      }
+
+
+
+      const response = await this.makeRequest('POST', '/user/nodes/ping', { type: 'extension' });
+
+
+
+      this.lastPingTimestamp = Date.now();
+
+
+
+      console.log(chalk.white(`🕒 [${new Date().toLocaleTimeString()}]`) + chalk.green(' ✓ PING'));
+
+      console.log(chalk.white(`📡 Status: ${response.status}`));
+
+      console.log(chalk.green(`💾 Data: ${JSON.stringify(response.data)}`));
+
+
+
+      return response.data;
+
+    } catch (error) {
+
+      console.log(chalk.red(`✗ [ERR] ${error.message}`));
+
+      throw error;
+
+    }
+
+  }
+
 }
+
+
 
 class MultiAccountPinger {
-    constructor() {
-        this.accounts = this.loadAccounts();
-        this.isRunning = true;
+
+  constructor() {
+
+    this.accounts = this.loadAccounts();
+
+    this.isRunning = true;
+
+  }
+
+
+
+  loadAccounts() {
+
+    try {
+
+      const accountData = fs.readFileSync('data.txt', 'utf8')
+
+        .split('\n')
+
+        .filter(line => line.trim());
+
+
+
+      const proxyData = fs.existsSync('proxies.txt')
+
+        ? fs.readFileSync('proxies.txt', 'utf8')
+
+          .split('\n')
+
+          .filter(line => line.trim())
+
+        : [];
+
+
+
+      return accountData.map((token, index) => ({
+
+        token: token.trim(),
+
+        proxy: proxyData[index] || null
+
+      }));
+
+    } catch (error) {
+
+      console.error(chalk.red('Error reading accounts:'), error);
+
+      process.exit(1);
+
     }
 
-    loadAccounts() {
-        try {
-            const accountData = fs.readFileSync('data.txt', 'utf8')
-                .split('\n')
-                .filter(line => line.trim());
-            
-            const proxyData = fs.existsSync('proxies.txt') 
-                ? fs.readFileSync('proxies.txt', 'utf8')
-                    .split('\n')
-                    .filter(line => line.trim())
-                : [];
-            
-            return accountData.map((token, index) => ({
-                token: token.trim(),
-                proxy: proxyData[index] || null
-            }));
-        } catch (error) {
-            console.error(chalk.red('Error reading accounts:'), error);
-            process.exit(1);
-        }
+  }
+
+
+
+  async processPing(account) {
+
+    const pinger = new NodeGoPinger(account.token, account.proxy);
+
+
+
+    try {
+
+      console.log(chalk.cyan(`\nPinging with token: ${account.token.slice(0, 10)}... (Proxy: ${account.proxy || 'None'})`));
+
+      await pinger.ping();
+
+    } catch (error) {
+
+      console.error(chalk.red(`Error pinging account: ${error.message}`));
+
     }
 
-    async processSingleAccount(account) {
-        const pinger = new NodeGoPinger(account.token, account.proxy);
-        
-        try {
-            const userInfo = await pinger.getUserInfo();
-            if (!userInfo) return;
+  }
 
-            const pingResponse = await pinger.ping();
 
-            console.log(chalk.white('='.repeat(50)));
-            console.log(chalk.cyan(`Username: ${userInfo.username}`));
-            console.log(chalk.yellow(`Email: ${userInfo.email}`));
-            
-            userInfo.nodes.forEach((node, index) => {
-                console.log(chalk.magenta(`\nNode ${index + 1}:`));
-                console.log(`  ID: ${node.id}`);
-                console.log(`  Total Points: ${node.totalPoint}`);
-                console.log(`  Today's Points: ${node.todayPoint}`);
-                console.log(`  Status: ${node.isActive ? 'Active' : 'Inactive'}`);
-            });
-            
-            console.log(chalk.green(`\nTotal Points: ${userInfo.totalPoint}`));
-            console.log(chalk.green(`Status Code: ${pingResponse.statusCode}`));
-            console.log(chalk.green(`Ping Message: ${pingResponse.message}`));
-            console.log(chalk.white(`Metadata ID: ${pingResponse.metadataId}`));
-            console.log(chalk.white('='.repeat(50)));
-        } catch (error) {
-            console.error(chalk.red(`Error processing account: ${error.message}`));
-        }
+
+  randomDelay() {
+
+    return Math.floor(Math.random() * 120000) + 240000; // 4-6 min delay
+
+  }
+
+
+
+  async runPinger() {
+
+    displayBanner(); 
+
+
+
+    process.on('SIGINT', () => {
+
+      console.log(chalk.yellow('\nGracefully shutting down...'));
+
+      this.isRunning = false;
+
+      setTimeout(() => process.exit(0), 1000);
+
+    });
+
+
+
+    console.log(chalk.yellow('\n⚡ Starting ping cycle...'));
+
+    while (this.isRunning) {
+
+      console.log(chalk.white(`\n⏰ Ping Cycle at ${new Date().toLocaleString()}`));
+
+
+
+      for (const account of this.accounts) {
+
+        if (!this.isRunning) break;
+
+        await this.processPing(account);
+
+      }
+
+
+
+      if (this.isRunning) {
+
+        const delayMs = this.randomDelay();
+
+        console.log(chalk.gray(`\nWaiting ${Math.round(delayMs/1000)} seconds before next cycle...`));
+
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+
+      }
+
     }
 
-    async runPinger() {
-        displayBanner();
-        
-        // Handle graceful shutdown
-        process.on('SIGINT', () => {
-            console.log(chalk.yellow('\nGracefully shutting down...'));
-            this.isRunning = false;
-            setTimeout(() => process.exit(0), 1000);
-        });
+  }
 
-        while (this.isRunning) {
-            console.log(chalk.white(`\n⏰ Ping Cycle at ${new Date().toLocaleString()}`));
-            
-            for (const account of this.accounts) {
-                if (!this.isRunning) break;
-                await this.processSingleAccount(account);
-            }
-
-            if (this.isRunning) {
-                await new Promise(resolve => setTimeout(resolve, 15000)); // 15 second delay
-            }
-        }
-    }
 }
 
-// Run the multi-account pinger
+
+
 const multiPinger = new MultiAccountPinger();
+
 multiPinger.runPinger();
