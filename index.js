@@ -286,7 +286,7 @@ class MultiAccountPinger {
 
   randomDelay() {
 
-    return Math.floor(Math.random() * 120000) + 240000; // 4-6 min delay
+    return Math.floor(Math.random() * 300000) + 300000; // 4-6 min delay
 
   }
 
